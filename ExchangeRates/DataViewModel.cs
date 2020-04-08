@@ -19,6 +19,7 @@ namespace ExchangeRates
         private static DataViewModel myInstance;
         private List<string> dates = new List<string>();
         private List<Rate> rates = new List<Rate>();
+        private string currentRate, currentConverter;
         private string currentDate = "";
         public static DataViewModel getInstance()
         {
@@ -44,8 +45,28 @@ namespace ExchangeRates
             get { return $"Publication date: {currentDate}"; }
             set
             {
-                this.currentDate = value;
-                this.OnPropertyChanged();
+                currentDate = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CurrentRate
+        {
+            get { return currentRate; }
+            set
+            {
+                currentRate = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CurrentConverter
+        {
+            get { return currentConverter; }
+            set
+            {
+                currentConverter = value;
+                OnPropertyChanged();
             }
         }
 

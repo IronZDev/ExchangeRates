@@ -13,6 +13,7 @@ namespace ExchangeRates.DataModels
         public double mid { get; set; }
         public string no { get; set; }
         public string effectiveDate { get; set; }
+        public int converter { get; set; }
         public string CodeWithName
         {
             get
@@ -20,5 +21,27 @@ namespace ExchangeRates.DataModels
                 return $"{code} - {currency}";
             }
         }
+        public void NormalizeMid()
+        {
+            int tempConverter = 1;
+            if (mid < 0.1)
+            {
+                while (mid < 1)
+                {
+                    tempConverter *= 10;
+                    mid *= 10;
+                }
+            }
+            converter = tempConverter;
+        }
+        public string GetWholeRateValue
+        {
+            get
+            {
+                NormalizeMid();
+                return $"{mid} {code} - Converter: {converter}";
+            }
+        }
+        
     }
 }

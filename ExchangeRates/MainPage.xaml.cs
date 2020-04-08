@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExchangeRates.DataModels;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,13 +32,7 @@ namespace ExchangeRates
             this.InitializeComponent();
             ViewModel = DataViewModel.getInstance();
             webHandler = new WebHandler();
-            LoadInitialViews();
-        }
-
-        private void LoadInitialViews() {
             DownloadDates();
-            String currentDate = DateTime.Today.ToString("yyyy-MM-dd");
-            DownloadRateForDay(currentDate);
         }
 
         private void DownloadDates()
@@ -47,6 +42,12 @@ namespace ExchangeRates
             Task.Run(() => webHandler.GetDates()).ContinueWith(antecedent => {
                 DownloadDatesButton.IsEnabled = true;
                 DatesListViewLoading.IsActive = false;
+                // Select last downloaded day and load info for it
+                String currentDate = DateTime.Today.ToString("yyyy-MM-dd");
+                DownloadRateForDay(currentDate);
+                // Reset rate and converter inputboxes
+                ViewModel.CurrentRate = "";
+                ViewModel.CurrentConverter = "";
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
@@ -66,12 +67,21 @@ namespace ExchangeRates
 
         private void DatesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DownloadRateForDay(e.AddedItems.Last().ToString());
+            if (e.AddedItems.Count != 0) // Ignore first selection when reloading list
+            {
+                DownloadRateForDay(e.AddedItems.Last().ToString());
+            }
         }
 
         private void RatesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            if (e.AddedItems.Count != 0) // Ignore first selection when reloading list
+            {
+                Rate chosenRate = (Rate)e.AddedItems.Last();
+                Debug.WriteLine(chosenRate.mid.ToString());
+                ViewModel.CurrentRate = chosenRate.mid.ToString();
+                ViewModel.CurrentConverter = chosenRate.converter.ToString();
+            }
         }
     }
 }

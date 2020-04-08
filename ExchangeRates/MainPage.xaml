@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <Grid>
+    <Grid x:Name="MainGrid" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="2*"/>
@@ -16,9 +16,33 @@
             <RowDefinition/>
             <RowDefinition Height="7*"/>
         </Grid.RowDefinitions>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="NormalHeight">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowHeight="500" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MainGrid.RowDefinitions[0].Height" Value="*"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="SmallHeight">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowHeight="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="MainGrid.RowDefinitions[0].Height" Value="2*"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="30,0,0,0">
             <Button x:Name="DownloadDatesButton" Content="Download dates" Click="DownloadDatesButton_Click"/>
-            <TextBlock x:Name="CurrentDateTextBlock" Text="{x:Bind Path=ViewModel.CurrentDate, Mode=OneWay}"/>
+            <TextBlock x:Name="CurrentDateTextBlock" Text="{x:Bind Path=ViewModel.CurrentDate, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Column="1">
+            <TextBox Height="32.8" Margin="0,0,20,0" Text="{x:Bind Path=ViewModel.CurrentRate, Mode=OneWay}" IsReadOnly="True"/>
+            <TextBox Height="32.8" Margin="20,0,0,0" Text="{x:Bind Path=ViewModel.CurrentConverter, Mode=OneWay}" IsReadOnly="True"/>
         </StackPanel>
         <ListView x:Name="DatesListView" Grid.Row="1" Margin="30,0,0,0" ItemsSource="{x:Bind Path=ViewModel.Dates, Mode=OneWay}" SelectionChanged="DatesListView_SelectionChanged" SelectionMode="Single"/>
         <ProgressRing x:Name="DatesListViewLoading" Grid.Row="1" RenderTransformOrigin="0.5,0.5">
@@ -33,7 +57,7 @@
                         <SymbolIcon Symbol="Calculator" Margin="0,0,10,0" />
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="{Binding CodeWithName}" FontWeight="Bold" />
-                            <TextBlock Text="{Binding mid}"/>
+                            <TextBlock Text="{Binding GetWholeRateValue}"/>
                         </StackPanel>
                     </StackPanel>
                 </DataTemplate>
