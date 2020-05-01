@@ -14,9 +14,8 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
-
-//Szablon elementu Pusta strona jest udokumentowany na stronie https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x415
 
 namespace ExchangeRates
 {
@@ -37,17 +36,18 @@ namespace ExchangeRates
 
         private void DownloadDates()
         {
-            DownloadDatesButton.IsEnabled = false;
+            UpdateDatesButton.IsEnabled = false;
             DatesListViewLoading.IsActive = true;
             Task.Run(() => webHandler.GetDates()).ContinueWith(antecedent => {
-                DownloadDatesButton.IsEnabled = true;
+                UpdateDatesButton.IsEnabled = true;
                 DatesListViewLoading.IsActive = false;
                 // Select last downloaded day and load info for it
-                String currentDate = DateTime.Today.ToString("yyyy-MM-dd");
+                String currentDate = ViewModel.Dates[0].date;
                 DownloadRateForDay(currentDate);
                 // Reset rate and converter inputboxes
                 ViewModel.CurrentRate = "";
                 ViewModel.CurrentConverter = "";
+                DatesListView.SelectedIndex = 0;
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
@@ -60,7 +60,7 @@ namespace ExchangeRates
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
-        private void DownloadDatesButton_Click(object sender, RoutedEventArgs e)
+        private void UpdateDatesButton_Click(object sender, RoutedEventArgs e)
         {
             DownloadDates();
         }
@@ -69,7 +69,7 @@ namespace ExchangeRates
         {
             if (e.AddedItems.Count != 0) // Ignore first selection when reloading list
             {
-                DownloadRateForDay(e.AddedItems.Last().ToString());
+                DownloadRateForDay(((YearRates)e.AddedItems.Last()).date);
             }
         }
 
@@ -82,6 +82,12 @@ namespace ExchangeRates
                 ViewModel.CurrentRate = chosenRate.mid.ToString();
                 ViewModel.CurrentConverter = chosenRate.converter.ToString();
             }
+        }
+        
+        // Add blank placeholder if no flag image is available for currency
+        private void FlagImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            ((BitmapImage)sender).UriSource = new Uri("ms-appx:///Assets/DummyFlag.png");
         }
     }
 }

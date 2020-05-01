@@ -17,7 +17,7 @@ namespace ExchangeRates
     {
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
         private static DataViewModel myInstance;
-        private List<string> dates = new List<string>();
+        private List<YearRates> dates = new List<YearRates>();
         private List<Rate> rates = new List<Rate>();
         private string currentRate, currentConverter;
         private string currentDate = "";
@@ -30,11 +30,12 @@ namespace ExchangeRates
             myInstance = this;
         }
 
-        public List<string> Dates
+        public List<YearRates> Dates
         {
             get { return this.dates; }
             set
             {
+                Debug.WriteLine(value[0].date);
                 this.dates = value;
                 this.OnPropertyChanged();
             }
@@ -42,7 +43,7 @@ namespace ExchangeRates
 
         public string CurrentDate
         {
-            get { return $"Publication date: {currentDate}"; }
+            get { return $"Chosen date: {currentDate}"; }
             set
             {
                 currentDate = value;

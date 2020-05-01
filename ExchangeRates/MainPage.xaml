@@ -37,14 +37,19 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
         <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="30,0,0,0">
-            <Button x:Name="DownloadDatesButton" Content="Download dates" Click="DownloadDatesButton_Click"/>
+            <Button x:Name="UpdateDatesButton" Content="Update dates" Click="UpdateDatesButton_Click"/>
             <TextBlock x:Name="CurrentDateTextBlock" Text="{x:Bind Path=ViewModel.CurrentDate, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Column="1">
-            <TextBox Height="32.8" Margin="0,0,20,0" Text="{x:Bind Path=ViewModel.CurrentRate, Mode=OneWay}" IsReadOnly="True"/>
-            <TextBox Height="32.8" Margin="20,0,0,0" Text="{x:Bind Path=ViewModel.CurrentConverter, Mode=OneWay}" IsReadOnly="True"/>
+            <TextBlock Text="Average currency rates:" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </StackPanel>
-        <ListView x:Name="DatesListView" Grid.Row="1" Margin="30,0,0,0" ItemsSource="{x:Bind Path=ViewModel.Dates, Mode=OneWay}" SelectionChanged="DatesListView_SelectionChanged" SelectionMode="Single"/>
+        <ListView x:Name="DatesListView" Grid.Row="1" Margin="30,0,0,0" ItemsSource="{x:Bind Path=ViewModel.Dates, Mode=OneWay}" SelectionChanged="DatesListView_SelectionChanged" SelectionMode="Single" SelectedIndex="0">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding date}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
         <ProgressRing x:Name="DatesListViewLoading" Grid.Row="1" RenderTransformOrigin="0.5,0.5">
             <ProgressRing.RenderTransform>
                 <CompositeTransform ScaleX="2" ScaleY="2"/>
@@ -54,10 +59,14 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <SymbolIcon Symbol="Calculator" Margin="0,0,10,0" />
-                        <StackPanel Orientation="Vertical">
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="{Binding flagImage}" ImageFailed="FlagImageFailed"/>
+                            </Image.Source>
+                        </Image>
+                        <StackPanel Orientation="Vertical" Margin="10, 0, 0, 0">
                             <TextBlock Text="{Binding CodeWithName}" FontWeight="Bold" />
-                            <TextBlock Text="{Binding GetWholeRateValue}"/>
+                            <TextBlock Text="{Binding wholeRateValue}"/>
                         </StackPanel>
                     </StackPanel>
                 </DataTemplate>

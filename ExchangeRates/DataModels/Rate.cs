@@ -34,7 +34,7 @@ namespace ExchangeRates.DataModels
             }
             converter = tempConverter;
         }
-        public string GetWholeRateValue
+        public string wholeRateValue
         {
             get
             {
@@ -42,6 +42,12 @@ namespace ExchangeRates.DataModels
                 return $"{mid} {code} - Converter: {converter}";
             }
         }
-        
+        public string flagImage
+        {
+            get
+            {
+                return $"https://github.com/transferwise/currency-flags/blob/master/src/flags/{code.ToLower()}.png?raw=true";
+            }
+        }
     }
 }

@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace ExchangeRates
 {
@@ -25,19 +27,40 @@ namespace ExchangeRates
 
         public async Task GetDates()
         {
-            String currentDate = DateTime.Today.ToString("yyyy-MM-dd");
-            String oneMonthAgoDate = DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd");
-            List<string> datesList = null;
-            try
+            int currentYear = DateTime.Today.Year;
+            List<YearRates> rates = new List<YearRates>();
+            string responseString = "";
+            string line;
+            StringReader reader;
+            for (int year = DateTime.Today.Year; year >= 2002; year--)
             {
-                string responseString = await httpClient.GetStringAsync($"http://api.nbp.pl/api/exchangerates/rates/a/eur/{oneMonthAgoDate}/{currentDate}/");
-                ExchangeRate responseConverted = JsonConvert.DeserializeObject<ExchangeRate>(responseString);
-                datesList = responseConverted.rates.ConvertAll(x => x.effectiveDate);
-            } catch (Exception e)
-            {
-                Debug.WriteLine(e.StackTrace);
+
+                try
+                {
+                    if (year == currentYear)
+                        responseString = await httpClient.GetStringAsync($"http://www.nbp.pl/kursy/xml/dir.txt");
+                    else
+                        responseString = await httpClient.GetStringAsync($"http://www.nbp.pl/kursy/xml/dir{year}.txt");
+                } catch (Exception e)
+                {
+                    Debug.WriteLine(e.StackTrace);
+                }
+                reader = new StringReader(responseString);
+                List<YearRates> ratesForYear = new List<YearRates>();
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line[0] == 'a')
+                    {
+                        String result = line.Substring(line.LastIndexOf('z') + 1);
+                        string date = $"20{result.Substring(0, 2)}-{result.Substring(2, 2)}-{result.Substring(4, 2)}";
+                        ratesForYear.Add(new YearRates(line, date));
+                    }
+                }
+                // Reverse order to have the latest date first
+                ratesForYear.Reverse();
+                rates.AddRange(ratesForYear);
             }
-            ViewModel.Dates = datesList;
+            ViewModel.Dates = rates;
         }
         
         public async Task GetRates(string date)

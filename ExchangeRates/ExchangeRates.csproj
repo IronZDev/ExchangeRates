@@ -121,6 +121,7 @@
     </Compile>
     <Compile Include="DataModels\ExchangeRate.cs" />
     <Compile Include="DataModels\Rate.cs" />
+    <Compile Include="DataModels\YearRates.cs" />
     <Compile Include="DataViewModel.cs" />
     <Compile Include="WebHandler.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -134,6 +135,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\DummyFlag.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
