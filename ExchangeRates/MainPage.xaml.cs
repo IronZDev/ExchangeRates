@@ -29,9 +29,17 @@ namespace ExchangeRates
         public MainPage()
         {
             this.InitializeComponent();
+            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             ViewModel = DataViewModel.getInstance();
             webHandler = new WebHandler();
-            DownloadDates();
+            if (ViewModel.Dates == null)
+            {
+                DownloadDates();
+            } else
+            {
+                if (DatesListView != null)
+                    DatesListView.SelectedIndex = ViewModel.CurrentDateSelection;
+            }
         }
 
         private void DownloadDates()
@@ -44,9 +52,8 @@ namespace ExchangeRates
                 // Select last downloaded day and load info for it
                 String currentDate = ViewModel.Dates[0].date;
                 DownloadRateForDay(currentDate);
-                // Reset rate and converter inputboxes
-                ViewModel.CurrentRate = "";
-                ViewModel.CurrentConverter = "";
+                // Reset current currency code
+                ViewModel.CurrentCurrencyCode = null;
                 DatesListView.SelectedIndex = 0;
             }, TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -70,18 +77,16 @@ namespace ExchangeRates
             if (e.AddedItems.Count != 0) // Ignore first selection when reloading list
             {
                 DownloadRateForDay(((YearRates)e.AddedItems.Last()).date);
+                ViewModel.CurrentDateSelection = DatesListView.SelectedIndex;
             }
         }
 
-        private void RatesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void RatesListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.AddedItems.Count != 0) // Ignore first selection when reloading list
-            {
-                Rate chosenRate = (Rate)e.AddedItems.Last();
-                Debug.WriteLine(chosenRate.mid.ToString());
-                ViewModel.CurrentRate = chosenRate.mid.ToString();
-                ViewModel.CurrentConverter = chosenRate.converter.ToString();
-            }
+            Debug.WriteLine("Clicked");
+            Rate chosenRate = (Rate)e.ClickedItem;
+            ViewModel.CurrentCurrencyCode = chosenRate.code;
+            this.Frame.Navigate(typeof(RateHistory), chosenRate.code);
         }
         
         // Add blank placeholder if no flag image is available for currency

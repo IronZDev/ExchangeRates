@@ -1,4 +1,5 @@
 ﻿using ExchangeRates.DataModels;
+using ExchangeRates.DataModels.RateHistoryModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
 using System;
@@ -16,6 +17,16 @@ namespace ExchangeRates
 {
     class WebHandler
     {
+        private class DatesRange
+        {
+            public DatesRange(DateTimeOffset startDate, DateTimeOffset endDate)
+            {
+                this.startDate = startDate;
+                this.endDate = endDate;
+            }
+            public DateTimeOffset startDate { get; set; }
+            public DateTimeOffset endDate { get; set; }
+        }
         HttpClient httpClient;
         public DataViewModel ViewModel { get; set; }
 
@@ -83,6 +94,59 @@ namespace ExchangeRates
                 Debug.WriteLine(e.StackTrace);
             }
             ViewModel.Rates = ratesList;
+        }
+        public async Task GetRatesForCurrency(string currencyCode, DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            List<DatesRange> datesRanges = new List<DatesRange>();
+            for (int year = startDate.Year; year <= endDate.Year; year++)
+            {
+                Debug.WriteLine(year);
+                // Only 1 year
+                if (startDate.Year == endDate.Year)
+                {
+                    datesRanges.Add(new DatesRange(startDate, endDate));
+                    break;
+                }
+                // Current year is starting year
+                else if (year == startDate.Year) {
+                    datesRanges.Add(new DatesRange(startDate, new DateTimeOffset(new DateTime(year, 12, 31)).Date));
+                }
+                // Current year is ending year
+                else if (year == endDate.Year)
+                {
+                    datesRanges.Add(new DatesRange(new DateTimeOffset(new DateTime(year, 01, 01)).Date, endDate));
+                }
+                // Whole year
+                else
+                {
+                    datesRanges.Add(new DatesRange(new DateTimeOffset(new DateTime(year, 01, 01)).Date,
+                        new DateTimeOffset(new DateTime(year, 12, 31)).Date));
+                }
+            }
+            List<DayRate> ratesList = new List<DayRate>();
+            foreach(DatesRange range in datesRanges)
+            {
+                try
+                {
+                    string responseString = await httpClient.GetStringAsync($"https://api.nbp.pl/api/exchangerates/rates/a/{currencyCode.ToLower()}/{formatDateTimeOffset(range.startDate)}/{formatDateTimeOffset(range.endDate)}/");
+                    RatesInRange responseConverted = JsonConvert.DeserializeObject<RatesInRange>(responseString);
+                    ratesList.AddRange(responseConverted.rates);
+                }
+                catch (JsonSerializationException ex)
+                {
+                    Debug.WriteLine(ex.Data);
+                    Debug.WriteLine(ex.Message);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.StackTrace);
+                }
+            }
+        }
+
+        private string formatDateTimeOffset(DateTimeOffset date)
+        {
+            return date.ToString("yyyy-MM-dd");
         }
     }
 }

@@ -1,12 +1,17 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.ExtendedExecution;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -23,6 +28,10 @@ namespace ExchangeRates
     sealed partial class App : Application
     {
         public DataViewModel ViewModel { get; set; }
+        Windows.Storage.ApplicationDataContainer localSettings;
+        Windows.Storage.StorageFolder localFolder;
+        Windows.Storage.ApplicationDataCompositeValue composite;
+        private Frame rootFrame;
         /// <summary>
         /// Inicjuje pojedynczy obiekt aplikacji. Jest to pierwszy wiersz napisanego kodu
         /// wykonywanego i jest logicznym odpowiednikiem metod main() lub WinMain().
@@ -32,6 +41,9 @@ namespace ExchangeRates
             this.InitializeComponent();
             this.Suspending += OnSuspending;
             this.ViewModel = new DataViewModel();
+            localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            composite = (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values["DataStoreViewModel"];
         }
 
         /// <summary>
@@ -41,7 +53,7 @@ namespace ExchangeRates
         /// <param name="e">Szczegóły dotyczące żądania uruchomienia i procesu.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            Frame rootFrame = Window.Current.Content as Frame;
+            rootFrame = Window.Current.Content as Frame;
 
             // Nie powtarzaj inicjowania aplikacji, gdy w oknie znajduje się już zawartość,
             // upewnij się tylko, że okno jest aktywne
@@ -68,7 +80,11 @@ namespace ExchangeRates
                     // Kiedy stos nawigacji nie jest przywrócony, przejdź do pierwszej strony,
                     // konfigurując nową stronę przez przekazanie wymaganych informacji jako
                     // parametr
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    composite = (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values["DataStoreViewModel"];
+                    if (composite["currentPage"] != null)
+                        rootFrame.SetNavigationState((string)composite["currentPage"]);
+                    else
+                        rootFrame.Navigate(typeof(MainPage), e.Arguments);
                 }
                 // Upewnij się, ze bieżące okno jest aktywne
                 Window.Current.Activate();
@@ -92,10 +108,48 @@ namespace ExchangeRates
         /// </summary>
         /// <param name="sender">Źródło żądania wstrzymania.</param>
         /// <param name="e">Szczegóły żądania wstrzymania.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
+        private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            //TODO: Zapisz stan aplikacji i zatrzymaj wszelkie aktywności w tle
+            using (var session = new ExtendedExecutionSession())
+            {
+                session.Reason = ExtendedExecutionReason.SavingData;
+                session.Description = "Pretending to save data to slow storage.";
+                ExtendedExecutionResult result = await session.RequestExtensionAsync();
+                switch (result)
+                {
+                    case ExtendedExecutionResult.Allowed:
+                        Debug.WriteLine("Saving state");
+                        StorageFile datesFile = await localFolder.CreateFileAsync("dates.txt",
+                            CreationCollisionOption.ReplaceExisting);
+                        await FileIO.WriteTextAsync(datesFile, JsonConvert.SerializeObject(ViewModel.Dates));
+                        StorageFile ratesFile = await localFolder.CreateFileAsync("rates.txt",
+                            CreationCollisionOption.ReplaceExisting);
+                        await FileIO.WriteTextAsync(ratesFile, JsonConvert.SerializeObject(ViewModel.Rates));
+                        composite["currentCurrencyCode"] = ViewModel.CurrentCurrencyCode;
+                        composite["currentDate"] = ViewModel.CurrentDate;
+                        composite["currentDateSelection"] = ViewModel.CurrentDateSelection;
+                        if (rootFrame.SourcePageType.Name == "RateHistory")
+                        {
+                            composite["toRateHistoryDate"] = ViewModel.ToRateHistoryDate;
+                            composite["fromRateHistoryDate"] = ViewModel.FromRateHistoryDate;
+                            StorageFile historyFile = await localFolder.CreateFileAsync("history.txt",
+                                CreationCollisionOption.ReplaceExisting);
+                            await FileIO.WriteTextAsync(ratesFile, JsonConvert.SerializeObject(ViewModel.HistoryOfCurrency));
+                        } else
+                        {
+                            composite["toRateHistoryDate"] = null;
+                            composite["fromRateHistoryDate"] = null;
+                        }
+                        composite["currentPage"] = rootFrame.GetNavigationState();
+                        localSettings.Values["DataStoreViewModel"] = composite;
+                        break;
+                    default:
+                    case ExtendedExecutionResult.Denied:
+                        Debug.WriteLine("Can't save state");
+                        break;
+                }
+            }
             deferral.Complete();
         }
     }

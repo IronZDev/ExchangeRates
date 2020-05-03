@@ -43,7 +43,7 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Column="1">
             <TextBlock Text="Average currency rates:" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </StackPanel>
-        <ListView x:Name="DatesListView" Grid.Row="1" Margin="30,0,0,0" ItemsSource="{x:Bind Path=ViewModel.Dates, Mode=OneWay}" SelectionChanged="DatesListView_SelectionChanged" SelectionMode="Single" SelectedIndex="0">
+        <ListView x:Name="DatesListView" Grid.Row="1" Margin="30,0,0,0" ItemsSource="{x:Bind Path=ViewModel.Dates, Mode=OneWay}" SelectionChanged="DatesListView_SelectionChanged" SelectionMode="Single">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding date}"/>
@@ -55,7 +55,7 @@
                 <CompositeTransform ScaleX="2" ScaleY="2"/>
             </ProgressRing.RenderTransform>
         </ProgressRing>
-        <ListView x:Name="RatesListView" Grid.Column="1" Grid.Row="1" Margin="30,0,30,0" ItemsSource="{x:Bind Path=ViewModel.Rates, Mode=OneWay}" SelectionMode="Single" SelectionChanged="RatesListView_SelectionChanged">
+        <ListView x:Name="RatesListView" Grid.Column="1" Grid.Row="1" Margin="30,0,30,0" ItemsSource="{x:Bind Path=ViewModel.Rates, Mode=OneWay}" IsItemClickEnabled="True" SelectionMode="Single" ItemClick="RatesListView_ItemClick">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
