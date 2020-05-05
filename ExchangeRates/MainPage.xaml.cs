@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
@@ -86,7 +87,7 @@ namespace ExchangeRates
             Debug.WriteLine("Clicked");
             Rate chosenRate = (Rate)e.ClickedItem;
             ViewModel.CurrentCurrencyCode = chosenRate.code;
-            this.Frame.Navigate(typeof(RateHistory), chosenRate.code);
+            this.Frame.Navigate(typeof(RateHistory), chosenRate.code, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
         }
         
         // Add blank placeholder if no flag image is available for currency

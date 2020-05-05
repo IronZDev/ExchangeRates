@@ -18,9 +18,27 @@
         </Grid.RowDefinitions>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
+                <VisualState x:Name="NormalWidth">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="AverageCurrencyTextBlock.FontSize" Value="50"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="SmallWidth">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="AverageCurrencyTextBlock.FontSize" Value="30"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+            <VisualStateGroup>
                 <VisualState x:Name="NormalHeight">
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowHeight="500" />
+                        <AdaptiveTrigger MinWindowHeight="550" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="MainGrid.RowDefinitions[0].Height" Value="*"/>
@@ -41,7 +59,7 @@
             <TextBlock x:Name="CurrentDateTextBlock" Text="{x:Bind Path=ViewModel.CurrentDate, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Column="1">
-            <TextBlock Text="Average currency rates:" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock x:Name="AverageCurrencyTextBlock" Text="Average currency rates:" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </StackPanel>
         <ListView x:Name="DatesListView" Grid.Row="1" Margin="30,0,0,0" ItemsSource="{x:Bind Path=ViewModel.Dates, Mode=OneWay}" SelectionChanged="DatesListView_SelectionChanged" SelectionMode="Single">
             <ListView.ItemTemplate>
@@ -65,8 +83,8 @@
                             </Image.Source>
                         </Image>
                         <StackPanel Orientation="Vertical" Margin="10, 0, 0, 0">
-                            <TextBlock Text="{Binding CodeWithName}" FontWeight="Bold" />
-                            <TextBlock Text="{Binding wholeRateValue}"/>
+                            <TextBlock Text="{Binding CodeWithName}" FontWeight="Bold" TextWrapping="WrapWholeWords"/>
+                            <TextBlock Text="{Binding wholeRateValue}" TextWrapping="WrapWholeWords"/>
                         </StackPanel>
                     </StackPanel>
                 </DataTemplate>
