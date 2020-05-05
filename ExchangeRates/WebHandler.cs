@@ -124,11 +124,11 @@ namespace ExchangeRates
                 }
             }
             List<DayRate> ratesList = new List<DayRate>();
-            foreach(DatesRange range in datesRanges)
+            foreach (DatesRange range in datesRanges)
             {
                 try
                 {
-                    string responseString = await httpClient.GetStringAsync($"https://api.nbp.pl/api/exchangerates/rates/a/{currencyCode.ToLower()}/{formatDateTimeOffset(range.startDate)}/{formatDateTimeOffset(range.endDate)}/");
+                    string responseString = await httpClient.GetStringAsync($"https://api.nbp.pl/api/exchangerates/rates/a/{currencyCode.ToLower()}/{HelperClass.formatDateTimeOffset(range.startDate)}/{HelperClass.formatDateTimeOffset(range.endDate)}/");
                     RatesInRange responseConverted = JsonConvert.DeserializeObject<RatesInRange>(responseString);
                     ratesList.AddRange(responseConverted.rates);
                 }
@@ -137,16 +137,22 @@ namespace ExchangeRates
                     Debug.WriteLine(ex.Data);
                     Debug.WriteLine(ex.Message);
                 }
+                catch (HttpRequestException)
+                {
+                    Debug.WriteLine("No data to download");
+                    continue;
+                }
                 catch (Exception e)
                 {
                     Debug.WriteLine(e.StackTrace);
                 }
             }
+            if (ratesList.Count > 0)
+                ViewModel.HistoryOfCurrency = ratesList;
+            else
+                ViewModel.HistoryOfCurrency = null;
         }
 
-        private string formatDateTimeOffset(DateTimeOffset date)
-        {
-            return date.ToString("yyyy-MM-dd");
-        }
+        
     }
 }

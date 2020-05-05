@@ -46,7 +46,10 @@ namespace ExchangeRates.DataModels
         {
             get
             {
-                return $"https://github.com/transferwise/currency-flags/blob/master/src/flags/{code.ToLower()}.png?raw=true";
+                if (code != null)
+                    return $"https://github.com/transferwise/currency-flags/blob/master/src/flags/{code.ToLower()}.png?raw=true";
+                else
+                    return null;
             }
         }
     }

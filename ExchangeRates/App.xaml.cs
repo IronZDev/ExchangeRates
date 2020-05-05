@@ -135,7 +135,7 @@ namespace ExchangeRates
                             composite["fromRateHistoryDate"] = ViewModel.FromRateHistoryDate;
                             StorageFile historyFile = await localFolder.CreateFileAsync("history.txt",
                                 CreationCollisionOption.ReplaceExisting);
-                            await FileIO.WriteTextAsync(ratesFile, JsonConvert.SerializeObject(ViewModel.HistoryOfCurrency));
+                            await FileIO.WriteTextAsync(historyFile, JsonConvert.SerializeObject(ViewModel.HistoryOfCurrency));
                         } else
                         {
                             composite["toRateHistoryDate"] = null;
