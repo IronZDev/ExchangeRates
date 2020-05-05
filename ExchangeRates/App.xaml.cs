@@ -111,6 +111,7 @@ namespace ExchangeRates
         private async void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
+            // To save all data,  extra time is needed, that's why ExtendedExecutionSession is used. On deny almost no data is saved.
             using (var session = new ExtendedExecutionSession())
             {
                 session.Reason = ExtendedExecutionReason.SavingData;
@@ -126,18 +127,19 @@ namespace ExchangeRates
                         StorageFile ratesFile = await localFolder.CreateFileAsync("rates.txt",
                             CreationCollisionOption.ReplaceExisting);
                         await FileIO.WriteTextAsync(ratesFile, JsonConvert.SerializeObject(ViewModel.Rates));
-                        composite["currentCurrencyCode"] = ViewModel.CurrentCurrencyCode;
+                        
                         composite["currentDate"] = ViewModel.CurrentDate;
                         composite["currentDateSelection"] = ViewModel.CurrentDateSelection;
                         if (rootFrame.SourcePageType.Name == "RateHistory")
                         {
+                            composite["currentCurrencyCode"] = ViewModel.CurrentCurrencyCode;
                             composite["toRateHistoryDate"] = ViewModel.ToRateHistoryDate;
                             composite["fromRateHistoryDate"] = ViewModel.FromRateHistoryDate;
                             StorageFile historyFile = await localFolder.CreateFileAsync("history.txt",
                                 CreationCollisionOption.ReplaceExisting);
                             await FileIO.WriteTextAsync(historyFile, JsonConvert.SerializeObject(ViewModel.HistoryOfCurrency));
-                        } else
-                        {
+                        } else {
+                            composite["currentCurrencyCode"] = null;
                             composite["toRateHistoryDate"] = null;
                             composite["fromRateHistoryDate"] = null;
                         }
@@ -146,7 +148,23 @@ namespace ExchangeRates
                         break;
                     default:
                     case ExtendedExecutionResult.Denied:
-                        Debug.WriteLine("Can't save state");
+                        Debug.WriteLine("Can't save the whole state");
+                        if (rootFrame.SourcePageType.Name == "RateHistory")
+                        {
+                            composite["toRateHistoryDate"] = ViewModel.ToRateHistoryDate;
+                            composite["fromRateHistoryDate"] = ViewModel.FromRateHistoryDate;
+                            composite["currentCurrencyCode"] = ViewModel.CurrentCurrencyCode;
+                        }
+                        else
+                        {
+                            composite["currentCurrencyCode"] = null;
+                            composite["toRateHistoryDate"] = null;
+                            composite["fromRateHistoryDate"] = null;
+                        }
+                        composite["currentDate"] = null; ;
+                        composite["currentDateSelection"] = null; ;
+                        composite["currentPage"] = rootFrame.GetNavigationState();
+                        localSettings.Values["DataStoreViewModel"] = composite;
                         break;
                 }
             }

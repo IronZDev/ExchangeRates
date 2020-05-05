@@ -32,6 +32,7 @@
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="AverageCurrencyTextBlock.FontSize" Value="30"/>
+                        <Setter Target="CodeWithNameTextBlock.Width" Value="200"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -76,17 +77,19 @@
         <ListView x:Name="RatesListView" Grid.Column="1" Grid.Row="1" Margin="30,0,30,0" ItemsSource="{x:Bind Path=ViewModel.Rates, Mode=OneWay}" IsItemClickEnabled="True" SelectionMode="Single" ItemClick="RatesListView_ItemClick">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Image>
-                            <Image.Source>
-                                <BitmapImage UriSource="{Binding flagImage}" ImageFailed="FlagImageFailed"/>
-                            </Image.Source>
-                        </Image>
-                        <StackPanel Orientation="Vertical" Margin="10, 0, 0, 0">
-                            <TextBlock Text="{Binding CodeWithName}" FontWeight="Bold" TextWrapping="WrapWholeWords"/>
-                            <TextBlock Text="{Binding wholeRateValue}" TextWrapping="WrapWholeWords"/>
+                    <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled">
+                        <StackPanel Orientation="Horizontal" Width="Auto">
+                            <Image>
+                                <Image.Source>
+                                    <BitmapImage UriSource="{Binding flagImage}" ImageFailed="FlagImageFailed"/>
+                                </Image.Source>
+                            </Image>
+                            <StackPanel Margin="10, 0, 10, 0" Width="Auto">
+                                <TextBlock x:Name="CodeWithNameTextBlock" Text="{Binding CodeWithName}" FontWeight="Bold" TextWrapping="WrapWholeWords" Width="Auto"/>
+                                <TextBlock Text="{Binding wholeRateValue}" TextWrapping="WrapWholeWords"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </ScrollViewer>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

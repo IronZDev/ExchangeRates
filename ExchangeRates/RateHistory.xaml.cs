@@ -96,13 +96,17 @@ namespace ExchangeRates
         private async void FromDatePicker_SelectedDateChanged(DatePicker sender, DatePickerSelectedValueChangedEventArgs args)
         {
             if (((ViewModel.ToRateHistoryDate != null && DateTimeOffset.Compare((DateTimeOffset)ViewModel.ToRateHistoryDate.Value.Date, args.NewDate.Value.Date) >= 0)
-                || ViewModel.ToRateHistoryDate == null) && DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date),args.NewDate.Value.Date) > 0)
+                || ViewModel.ToRateHistoryDate == null) && DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date),args.NewDate.Value.Date) >= 0)
             {
                 ToDatePicker.IsEnabled = true;
                 ToDatePicker.MinYear = args.NewDate.Value.Date;
                 ViewModel.FromRateHistoryDate = args.NewDate.Value.Date;
+                if (ViewModel.ToRateHistoryDate.HasValue == true)
+                {
+                    DownloadDataButton.IsEnabled = true;
+                }
             }
-            else if (DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date), args.NewDate.Value.Date) <= 0)
+            else if (DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date), args.NewDate.Value.Date) < 0)
             {
                 var messageDialog = new MessageDialog("The specified dates can't be in the future");
                 DownloadDataButton.IsEnabled = false;
@@ -125,11 +129,11 @@ namespace ExchangeRates
         private async void ToDatePicker_SelectedDateChanged(DatePicker sender, DatePickerSelectedValueChangedEventArgs args)
         {
             if (ViewModel.FromRateHistoryDate != null && DateTimeOffset.Compare((DateTimeOffset)ViewModel.FromRateHistoryDate.Value.Date, args.NewDate.Value.Date) <= 0
-                && DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date), args.NewDate.Value.Date) > 0)
+                && DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date), args.NewDate.Value.Date) >= 0)
             {
                 ViewModel.ToRateHistoryDate = args.NewDate.Value.Date;
                 DownloadDataButton.IsEnabled = true;
-            } else if (DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date), args.NewDate.Value.Date) <= 0)
+            } else if (DateTimeOffset.Compare(new DateTimeOffset(DateTime.Today.Date), args.NewDate.Value.Date) < 0)
             {
                 var messageDialog = new MessageDialog("The specified dates can't be in the future");
                 SaveButton.IsEnabled = false;
