@@ -1,23 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.ExtendedExecution;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 namespace ExchangeRates
@@ -81,7 +70,7 @@ namespace ExchangeRates
                     // konfigurując nową stronę przez przekazanie wymaganych informacji jako
                     // parametr
                     composite = (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values["DataStoreViewModel"];
-                    if (composite["currentPage"] != null)
+                    if (composite != null && composite["currentPage"] != null)
                         rootFrame.SetNavigationState((string)composite["currentPage"]);
                     else
                         rootFrame.Navigate(typeof(MainPage), e.Arguments);
